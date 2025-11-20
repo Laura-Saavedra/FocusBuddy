@@ -3,7 +3,7 @@ services:
     name: focusbuddy
     env: python
     plan: free
-    buildCommand: "pip install -r requirements.txt"
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
     startCommand: "gunicorn focusbubby.wsgi:application"
     envVars:
       - key: SECRET_KEY
