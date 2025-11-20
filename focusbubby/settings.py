@@ -69,26 +69,16 @@ DATABASES = {
     }
 }
 
-import os
-from urllib.parse import quote_plus
-import certifi
-from pymongo import MongoClient
+# MongoDB Atlas — conexión con PyMongo
+MONGO_USER = "Lsaavedra"
+MONGO_PASSWORD = "Lau0804*"
+MONGO_CLUSTER = "focusbuddycluster.p6nszrc.mongodb.net"
+MONGO_DB_NAME = "focusbuddy"   # ← nombre REAL donde quieres guardar tareas
 
-# Leer las variables desde Render
-MONGO_USER = os.environ.get("MONGO_USER")
-MONGO_PASSWORD = quote_plus(os.environ.get("MONGO_PASSWORD"))
-MONGO_CLUSTER = os.environ.get("MONGO_CLUSTER")
-MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME")
-
-# URI construida automáticamente
 MONGO_URI = (
     f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}"
-    f"@{MONGO_CLUSTER}/{MONGO_DB_NAME}?retryWrites=true&w=majority"
+    f"@{MONGO_CLUSTER}/?retryWrites=true&w=majority"
 )
-
-# Cliente Mongo
-client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
-db = client[MONGO_DB_NAME]
 
 
 
