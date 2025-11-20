@@ -70,15 +70,14 @@ DATABASES = {
 }
 
 import os
+from urllib.parse import quote_plus
 
-# Mongo Atlas — conexión con PyMongo
-MONGO_USER = os.environ.get("MONGO_USER", "Lsaavedra")        # valor local por defecto
+MONGO_USER = os.environ.get("MONGO_USER", "Lsaavedra")
 MONGO_PASSWORD = os.environ.get("MONGO_PASSWORD", "Lau0804*")
 MONGO_CLUSTER = os.environ.get("MONGO_CLUSTER", "focusbuddycluster.p6nszrc.mongodb.net")
 MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "focusbuddy")
 
-MONGO_URI = f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_CLUSTER}/?retryWrites=true&w=majority"
-
+MONGO_URI = f"mongodb+srv://{quote_plus(MONGO_USER)}:{quote_plus(MONGO_PASSWORD)}@{MONGO_CLUSTER}/?retryWrites=true&w=majority"
 
 
 # Password validation
