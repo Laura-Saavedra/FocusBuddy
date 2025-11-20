@@ -1,10 +1,8 @@
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
 from .models import Tarea, SesionEstudio, MicroLeccion
 from .forms import MicroLeccionForm, TareaForm, SesionEstudioForm
 from django.views.generic import ListView, DetailView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from pymongo import MongoClient
 from django.conf import settings
@@ -13,11 +11,7 @@ from django.http import JsonResponse
 
 def inicio(request):
     lecciones = MicroLeccion.objects.all()[:5]
-
-    if request.user.is_authenticated:
-        tareas = Tarea.objects.filter(usuario=request.user).order_by('-creada_en')[:5]
-    else:
-        tareas = []
+    tareas = Tarea.objects.all().order_by('-creada_en')[:5]
 
     return render(request, 'core/inicio.html', {
         'lecciones': lecciones,
@@ -25,27 +19,25 @@ def inicio(request):
     })
 
 
-class ListaTareasView(LoginRequiredMixin, ListView):
+class ListaTareasView(ListView):
     model = Tarea
     template_name = 'core/lista_tareas.html'
     context_object_name = 'tareas'
 
     def get_queryset(self):
-        return Tarea.objects.filter(usuario=self.request.user).order_by('-creada_en')
+        return Tarea.objects.all().order_by('-creada_en')
 
 
-@login_required
 def crear_tarea(request):
     if request.method == 'POST':
         form = TareaForm(request.POST)
 
         if form.is_valid():
-            # 1. Guardar en SQLite
             tarea = form.save(commit=False)
-            tarea.usuario = request.user
+            tarea.usuario = None  # SIN USUARIO
             tarea.save()
 
-            # 2. Guardar también en MongoDB
+            # Guardar también en Mongo
             try:
                 client = MongoClient(settings.MONGO_URI)
                 db = client[settings.MONGO_DB_NAME]
@@ -53,7 +45,6 @@ def crear_tarea(request):
 
                 tareas_col.insert_one({
                     "_id_sqlite": tarea.id,
-                    "usuario": request.user.username,
                     "titulo": tarea.titulo,
                     "descripcion": tarea.descripcion,
                     "minutos_estimados": tarea.minutos_estimados,
@@ -71,18 +62,14 @@ def crear_tarea(request):
     return render(request, 'core/crear_tarea.html', {'form': form})
 
 
-class DetalleTareaView(LoginRequiredMixin, DetailView):
+class DetalleTareaView(DetailView):
     model = Tarea
     template_name = 'core/detalle_tarea.html'
     pk_url_kwarg = 'tarea_id'
 
-    def get_queryset(self):
-        return Tarea.objects.filter(usuario=self.request.user)
 
-
-@login_required
 def editar_tarea(request, tarea_id):
-    tarea = get_object_or_404(Tarea, pk=tarea_id, usuario=request.user)
+    tarea = get_object_or_404(Tarea, pk=tarea_id)
 
     if request.method == 'POST':
         form = TareaForm(request.POST, instance=tarea)
@@ -95,21 +82,15 @@ def editar_tarea(request, tarea_id):
     return render(request, 'core/editar_tarea.html', {'form': form, 'tarea': tarea})
 
 
-class EliminarTareaView(LoginRequiredMixin, DeleteView):
+class EliminarTareaView(DeleteView):
     model = Tarea
     template_name = 'core/eliminar_tarea.html'
     pk_url_kwarg = 'tarea_id'
     success_url = reverse_lazy('core:lista_tareas')
 
-    def get_queryset(self):
-        return Tarea.objects.filter(usuario=self.request.user)
 
-@login_required
 def crear_sesion(request):
-    tareas_usuario = Tarea.objects.filter(
-        usuario=request.user,
-        completada=False
-    ).order_by('-creada_en')
+    tareas_usuario = Tarea.objects.filter(completada=False).order_by('-creada_en')
 
     if request.method == 'POST':
         form = SesionEstudioForm(request.POST)
@@ -117,12 +98,10 @@ def crear_sesion(request):
 
         if form.is_valid():
             sesion = form.save(commit=False)
-            sesion.usuario = request.user
-
-
-            sesion.fin_en = timezone.now()   
-
+            sesion.usuario = None  # SIN USUARIO
+            sesion.fin_en = timezone.now()
             sesion.save()
+
             return redirect('core:detalle_sesion', sesion_id=sesion.id)
 
     else:
@@ -132,29 +111,24 @@ def crear_sesion(request):
     return render(request, 'core/crear_sesion.html', {'form': form})
 
 
-
-class DetalleSesionView(LoginRequiredMixin, DetailView):
+class DetalleSesionView(DetailView):
     model = SesionEstudio
     template_name = 'core/detalle_sesion.html'
     pk_url_kwarg = 'sesion_id'
     context_object_name = 'sesion'
 
-    def get_queryset(self):
-        return SesionEstudio.objects.filter(usuario=self.request.user)
 
-
-class ListaSesionesView(LoginRequiredMixin, ListView):
+class ListaSesionesView(ListView):
     model = SesionEstudio
     template_name = 'core/lista_sesiones.html'
     context_object_name = 'sesiones'
 
     def get_queryset(self):
-        return SesionEstudio.objects.filter(usuario=self.request.user).order_by('-inicio_en')
+        return SesionEstudio.objects.all().order_by('-inicio_en')
 
 
-@login_required
 def editar_sesion(request, sesion_id):
-    sesion = get_object_or_404(SesionEstudio, pk=sesion_id, usuario=request.user)
+    sesion = get_object_or_404(SesionEstudio, pk=sesion_id)
 
     if request.method == 'POST':
         form = SesionEstudioForm(request.POST, instance=sesion)
@@ -167,15 +141,13 @@ def editar_sesion(request, sesion_id):
     return render(request, 'core/editar_sesion.html', {'form': form, 'sesion': sesion})
 
 
-class EliminarSesionView(LoginRequiredMixin, DeleteView):
+class EliminarSesionView(DeleteView):
     model = SesionEstudio
     template_name = 'core/eliminar_sesion.html'
     pk_url_kwarg = 'sesion_id'
     success_url = reverse_lazy('core:lista_sesiones')
     context_object_name = 'sesion'
 
-    def get_queryset(self):
-        return SesionEstudio.objects.filter(usuario=self.request.user)
 
 def microlecciones_index(request):
     lecciones = MicroLeccion.objects.all()
@@ -191,7 +163,6 @@ def microleccion_crear(request):
     if request.method == 'POST':
         form = MicroLeccionForm(request.POST)
         if form.is_valid():
-
             leccion = form.save()
 
             try:
@@ -215,6 +186,7 @@ def microleccion_crear(request):
         form = MicroLeccionForm()
 
     return render(request, 'core/microleccion_crear.html', {'form': form})
+
 
 def test_mongo(request):
     client = MongoClient(settings.MONGO_URI)
