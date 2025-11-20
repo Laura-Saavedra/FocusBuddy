@@ -11,12 +11,16 @@ import certifi
 
 # --- Función para conectarse a Mongo Atlas ---
 def get_mongo_db():
-    client = MongoClient(
-        settings.MONGO_URI,
-        tls=True,
-        tlsCAFile=certifi.where()
-    )
-    return client[settings.MONGO_DB_NAME]
+    try:
+        client = MongoClient(
+            settings.MONGO_URI,
+            tls=True,
+            tlsCAFile=certifi.where()
+        )
+        return client[settings.MONGO_DB_NAME]
+    except Exception as e:
+        print("Error conectando a Mongo Atlas:", e)
+        return None
 
 # --- Inicio ---
 def inicio(request):
@@ -42,27 +46,26 @@ def crear_tarea(request):
         if form.is_valid():
             tarea = form.save(commit=False)
             tarea.usuario = request.user
-            tarea.save()
+            tarea.save()  # SQLite
 
-            try:
-                db = get_mongo_db()
-                tareas_col = db["tareas"]
-                tareas_col.insert_one({
-                    "_id_sqlite": tarea.id,
-                    "usuario": request.user.username,
-                    "titulo": tarea.titulo,
-                    "descripcion": tarea.descripcion,
-                    "minutos_estimados": tarea.minutos_estimados,
-                    "completada": tarea.completada,
-                    "creada_en": tarea.creada_en.isoformat(),
-                })
-            except Exception as e:
-                print("Error guardando tarea en Mongo:", e)
+            db = get_mongo_db()
+            if db is not None:
+                try:
+                    db["tareas"].insert_one({
+                        "_id_sqlite": tarea.id,
+                        "usuario": request.user.username,
+                        "titulo": tarea.titulo,
+                        "descripcion": tarea.descripcion,
+                        "minutos_estimados": tarea.minutos_estimados,
+                        "completada": tarea.completada,
+                        "creada_en": tarea.creada_en.isoformat(),
+                    })
+                except Exception as e:
+                    print("Error guardando tarea en Mongo:", e)
 
             return redirect('core:lista_tareas')
     else:
         form = TareaForm()
-
     return render(request, 'core/crear_tarea.html', {'form': form})
 
 # --- Detalle de Tarea ---
@@ -77,22 +80,21 @@ def editar_tarea(request, tarea_id):
     if request.method == 'POST':
         form = TareaForm(request.POST, instance=tarea)
         if form.is_valid():
-            form.save()
-            # Actualizar Mongo
-            try:
-                db = get_mongo_db()
-                tareas_col = db["tareas"]
-                tareas_col.update_one(
-                    {"_id_sqlite": tarea.id},
-                    {"$set": {
-                        "titulo": tarea.titulo,
-                        "descripcion": tarea.descripcion,
-                        "minutos_estimados": tarea.minutos_estimados,
-                        "completada": tarea.completada,
-                    }}
-                )
-            except Exception as e:
-                print("Error actualizando tarea en Mongo:", e)
+            form.save()  # SQLite
+            db = get_mongo_db()
+            if db is not None:
+                try:
+                    db["tareas"].update_one(
+                        {"_id_sqlite": tarea.id},
+                        {"$set": {
+                            "titulo": tarea.titulo,
+                            "descripcion": tarea.descripcion,
+                            "minutos_estimados": tarea.minutos_estimados,
+                            "completada": tarea.completada,
+                        }}
+                    )
+                except Exception as e:
+                    print("Error actualizando tarea en Mongo:", e)
             return redirect('core:detalle_tarea', tarea_id=tarea.id)
     else:
         form = TareaForm(instance=tarea)
@@ -107,13 +109,14 @@ class EliminarTareaView(DeleteView):
 
     def delete(self, request, *args, **kwargs):
         tarea = self.get_object()
-        # Borrar en Mongo
-        try:
-            db = get_mongo_db()
-            db["tareas"].delete_one({"_id_sqlite": tarea.id})
-        except Exception as e:
-            print("Error eliminando tarea en Mongo:", e)
-        return super().delete(request, *args, **kwargs)
+        response = super().delete(request, *args, **kwargs)  # SQLite principal
+        db = get_mongo_db()
+        if db is not None:
+            try:
+                db["tareas"].delete_one({"_id_sqlite": tarea.id})
+            except Exception as e:
+                print("Error eliminando tarea en Mongo:", e)
+        return response
 
 # --- Sesiones ---
 def crear_sesion(request):
@@ -176,19 +179,19 @@ def microleccion_crear(request):
     if request.method == 'POST':
         form = MicroLeccionForm(request.POST)
         if form.is_valid():
-            leccion = form.save()
-            try:
-                db = get_mongo_db()
-                lecciones_col = db["microlecciones"]
-                lecciones_col.insert_one({
-                    "_id_sqlite": leccion.id,
-                    "titulo": leccion.titulo,
-                    "contenido": leccion.contenido,
-                    "duracion_estimada": leccion.duracion_estimada,
-                    "creada_en": leccion.creada_en.isoformat(),
-                })
-            except Exception as e:
-                print("Error guardando microlección en Mongo:", e)
+            leccion = form.save()  # SQLite
+            db = get_mongo_db()
+            if db is not None:
+                try:
+                    db["microlecciones"].insert_one({
+                        "_id_sqlite": leccion.id,
+                        "titulo": leccion.titulo,
+                        "contenido": leccion.contenido,
+                        "duracion_estimada": leccion.duracion_estimada,
+                        "creada_en": leccion.creada_en.isoformat(),
+                    })
+                except Exception as e:
+                    print("Error guardando microlección en Mongo:", e)
             return redirect('core:microlecciones_index')
     else:
         form = MicroLeccionForm()
@@ -196,10 +199,12 @@ def microleccion_crear(request):
 
 # --- Test Mongo ---
 def test_mongo(request):
-    try:
-        db = get_mongo_db()
-        tareas = db["tareas"]
-        result = tareas.insert_one({"titulo": "Prueba desde test-mongo"})
-        return JsonResponse({"inserted": str(result.inserted_id)})
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+    db = get_mongo_db()
+    if db is not None:
+        try:
+            tareas = db["tareas"]
+            result = tareas.insert_one({"titulo": "Prueba desde test-mongo"})
+            return JsonResponse({"inserted": str(result.inserted_id)})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Mongo Atlas no disponible"}, status=500)

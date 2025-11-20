@@ -83,7 +83,7 @@ MONGO_URI = (
     f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}"
     f"@{MONGO_CLUSTER}/?retryWrites=true&w=majority"
 )
-MONGO_TLS_CA_FILE = certifi.where()  # <- Esto asegura que use certificados confiables
+MONGO_TLS_CA_FILE = certifi.where()  
 
 
 # Password validation
