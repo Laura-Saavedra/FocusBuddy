@@ -6,7 +6,7 @@ from . import views
 app_name = 'core'
 
 urlpatterns = [
-    # INICIO
+
     path('', views.inicio, name='inicio'),
 
     path('tareas/', views.ListaTareasView.as_view(), name='lista_tareas'),
