@@ -1,0 +1,28 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h2>{{ tarea.titulo }}</h2>
+<li style="list-style: none;">
+
+<p>{{ tarea.descripcion }}</p>
+
+<p>
+  Estado:
+  {% if tarea.completada %}
+    ✔ Completada
+  {% else %}
+    Pendiente
+  {% endif %}
+</p>
+
+<p>Creada en: {{ tarea.creada_en|date:"Y-m-d H:i" }}</p>
+
+<div class="mt-3">
+  <a href="{% url 'core:editar_tarea' tarea.id %}" class="btn btn-warning">Editar</a>
+  <a href="{% url 'core:eliminar_tarea' tarea.id %}" class="btn btn-danger">Eliminar</a>
+  <a href="{% url 'core:lista_tareas' %}" class="btn btn-dark">← Volver</a>
+</div>
+
+</li>
+
+{% endblock %}

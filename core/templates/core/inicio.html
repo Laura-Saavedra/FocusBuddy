@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+
+<h3>Micro lecciones disponibles</h3>
+
+{% if lecciones %}
+<ul>
+  {% for l in lecciones %}
+      <li>{{ l.titulo }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+{% endif %}
+
+{% if user.is_authenticated %}
+  <h3>Tus tareas recientes</h3>
+  {% if tareas %}
+    <ul>
+      {% for t in tareas %}
+        <li>{{ t.titulo }} {% if t.completada %}(✔){% endif %}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No tienes tareas pendientes.</p>
+  {% endif %}
+{% else %}
+  <p>Inicia sesión para usar FocusBuddy.</p>
+{% endif %}
+
+{% endblock %}
+

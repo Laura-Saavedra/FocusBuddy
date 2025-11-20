@@ -1,0 +1,41 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h2>Mis tareas</h2>
+
+<p>
+  <a href="{% url 'core:crear_tarea' %}" class="btn btn-primary"> Crear nueva tarea</a>
+</p>
+
+<ul style="list-style: none; padding: 0;">
+  {% for tarea in tareas %}
+    <li class="task-card">
+
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <a href="{% url 'core:detalle_tarea' tarea.id %}" style="text-decoration: none; font-weight: bold; font-size: 16px;">
+          {{ tarea.titulo }}
+        </a>
+        {% if tarea.completada %}
+          <span style="color: green; font-weight: bold;">✔ Completada</span>
+        {% else %}
+          <span style="color: rgb(38, 96, 150); font-weight: bold;">Pendiente</span>
+        {% endif %}
+      </div>
+
+      <p style="margin: 6px 0;">
+        {{ tarea.descripcion }}<br>
+        <small>Creada: {{ tarea.creada_en|date:"Y-m-d H:i" }}</small>
+      </p>
+
+        <div>
+          <a href="{% url 'core:editar_tarea' tarea.id %}" class="btn btn-warning">Editar</a>
+          <a href="{% url 'core:eliminar_tarea' tarea.id %}" class="btn btn-danger">Eliminar</a>
+        </div>
+
+
+    </li>
+  {% empty %}
+    <li>No tienes tareas registradas aún.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

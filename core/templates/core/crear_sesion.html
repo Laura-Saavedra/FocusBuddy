@@ -1,0 +1,41 @@
+{% extends "core/base.html" %}
+{% block content %}
+<h2>Iniciar sesión de estudio</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Guardar sesión</button>
+
+   <a href="{% url 'core:lista_sesiones' %}" class="btn btn-primary">Ver historial sesiones</a>
+</form>
+<br>
+<br>
+<div>
+  <h3>Temporizador (Pomodoro 25:00)</h3>
+  <div id="timer">25:00</div>
+<br>
+  <button id="startBtn" class="btn btn-success">Iniciar</button>
+  <button id="stopBtn" class="btn btn-dark">Detener</button>
+</div>
+
+<script>
+let timerEl = document.getElementById('timer');
+let startBtn = document.getElementById('startBtn');
+let stopBtn = document.getElementById('stopBtn');
+let interval = null;
+let seconds = 25*60;
+
+function format(s){ return Math.floor(s/60).toString().padStart(2,'0') + ':' + (s%60).toString().padStart(2,'0'); }
+timerEl.textContent = format(seconds);
+
+startBtn.onclick = function(){
+  if(interval) return;
+  interval = setInterval(()=>{
+    seconds -=1;
+    timerEl.textContent = format(seconds);
+    if(seconds<=0){ clearInterval(interval); interval=null; alert('¡Tiempo! Toma un breve descanso.'); }
+  },1000);
+}
+stopBtn.onclick = function(){ clearInterval(interval); interval=null; }
+</script>
+{% endblock %}

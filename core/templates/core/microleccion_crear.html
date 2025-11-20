@@ -1,0 +1,17 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h2>Crear nueva microlección</h2>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  
+<button href="{% url 'core:microlecciones_index' %}" type="submit" class="btn btn-primary">Guardar</button>
+
+</form>
+<br>
+<a href="{% url 'core:microlecciones_index' %}" class="btn btn-dark">← Volver a microlecciones</a>
+
+
+{% endblock %}

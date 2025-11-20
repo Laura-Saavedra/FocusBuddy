@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h2>Micro lecciones disponibles</h2>
+
+<a href="{% url 'core:microleccion_crear' %}" class="btn btn-primary"> Crear nueva microlección</a>
+<br>
+<br>
+<ul>
+  {% for l in lecciones %}
+    <li style="margin-bottom: 10px;">
+      <strong>{{ l.titulo }}</strong><br>
+      <p>{{ l.contenido|truncatewords:30 }}</p>
+      <a href="{% url 'core:microleccion_detalle' l.id %}">Ver detalle</a>
+    </li>
+  {% empty %}
+    <li>No hay microlecciones disponibles.</li>
+  {% endfor %}
+</ul>
+
+{% endblock %}

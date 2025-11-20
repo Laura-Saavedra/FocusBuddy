@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+<li style="list-style: none;">
+
+    <h2>{{ leccion.titulo }}</h2>
+    <p>{{ leccion.contenido }}</p>
+
+    </li>
+
+</div>
+
+<div class="text-center mt-3">
+    <a href="{% url 'core:microlecciones_index' %}" class="btn btn-dark">⬅ Volver</a>
+</div>
+
+
+{% endblock %}

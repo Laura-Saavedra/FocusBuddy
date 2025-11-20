@@ -1,0 +1,27 @@
+{% extends "core/base.html" %}
+{% block content %}
+<h2>Detalle sesión</h2>
+<li style="list-style: none;">
+
+<p><strong>Tipo:</strong> {{ sesion.tipo_sesion }}</p>
+<p><strong>Duración (min):</strong> {{ sesion.duracion_minutos }}</p>
+<p><strong>Inició:</strong> {{ sesion.inicio_en }}</p>
+<p><strong>Terminó:</strong> {{ sesion.fin_en }}</p>
+
+{% if sesion.tarea %}
+  <p><strong>Tarea asociada:</strong> {{ sesion.tarea.titulo }}</p>
+{% endif %}
+
+<p><strong>Notas:</strong> {{ sesion.notas }}</p>
+
+<br>
+
+<a href="{% url 'core:editar_sesion' sesion.id %}" class="btn btn-primary">Editar</a> 
+<a href="{% url 'core:eliminar_sesion' object.id %}" class="btn btn-danger">Eliminar</a> 
+<a href="{% url 'core:lista_sesiones' %}"class="btn btn-dark">Volver a sesiones</a>
+
+
+
+</li>
+
+{% endblock %}
