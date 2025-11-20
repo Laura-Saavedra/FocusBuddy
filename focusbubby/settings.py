@@ -79,14 +79,10 @@ MONGO_PASSWORD = quote_plus("Lau0804*")  # codifica el *
 MONGO_CLUSTER = "focusbuddycluster.p6nszrc.mongodb.net"
 MONGO_DB_NAME = "focusbuddy"
 
-MONGO_URI = f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_CLUSTER}/?retryWrites=true&w=majority"
+MONGO_URI = f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_CLUSTER}/{MONGO_DB_NAME}?retryWrites=true&w=majority"
 
-try:
-    client = MongoClient(MONGO_URI, tlsCAFile=certifi.where(), serverSelectionTimeoutMS=5000)
-    client.admin.command("ping")
-    print("Conectado a Mongo Atlas correctamente")
-except Exception as e:
-    print("Error al conectar a Mongo Atlas:", e)
+client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
+db = client[MONGO_DB_NAME]
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
