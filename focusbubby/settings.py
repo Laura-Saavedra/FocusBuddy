@@ -1,22 +1,24 @@
 from pathlib import Path
-import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-=&7nxz92(t00!4q$$07b@q9^^cq1c)#_(zwz68wrbry1@d6%^@')
+SECRET_KEY = 'django-insecure-=&7nxz92(t00!4q$$07b@q9^^cq1c)#_(zwz68wrbry1@d6%^@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "True") == "True"
+DEBUG = True
 
-# Hosts permitidos
-ALLOWED_HOSTS = ['focusbuddy-e9mo.onrender.com', 'localhost', '127.0.0.1']
+# CAMBIADO PARA PERMITIR ACCESO DESDE INTERNET (RENDER)
+ALLOWED_HOSTS = ['*']
+
 
 # Application definition
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -56,7 +58,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'focusbubby.wsgi.application'
 
-# Database (SQLite local)
+
+# Database
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -65,36 +70,60 @@ DATABASES = {
 }
 
 # MongoDB Atlas — conexión con PyMongo
-MONGO_USER = os.environ.get("MONGO_USER", "Lsaavedra")
-MONGO_PASSWORD = os.environ.get("MONGO_PASSWORD", "Lau0804*")
-MONGO_CLUSTER = os.environ.get("MONGO_CLUSTER", "focusbuddycluster.p6nszrc.mongodb.net")
-MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "focusbuddy")
+MONGO_USER = "Lsaavedra"
+MONGO_PASSWORD = "Lau0804*"
+MONGO_CLUSTER = "focusbuddycluster.p6nszrc.mongodb.net"
+MONGO_DB_NAME = "focusbuddy"   # ← nombre REAL donde quieres guardar tareas
 
 MONGO_URI = (
     f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}"
-    f"@{MONGO_CLUSTER}/{MONGO_DB_NAME}?retryWrites=true&w=majority"
+    f"@{MONGO_CLUSTER}/?retryWrites=true&w=majority"
 )
 
+
 # Password validation
+# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
 ]
 
+
 # Internationalization
+# https://docs.djangoproject.com/en/5.2/topics/i18n/
+
 LANGUAGE_CODE = 'en-us'
+
 TIME_ZONE = 'America/Bogota'
+
 USE_I18N = True
+
 USE_TZ = True
 
+
 # Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.2/howto/static-files/
+
 STATIC_URL = '/static/'
+
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 STATICFILES_DIRS = [
     BASE_DIR / 'core/static',
 ]
 
 # Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

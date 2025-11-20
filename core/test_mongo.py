@@ -1,15 +1,12 @@
 from pymongo import MongoClient
-from django.http import JsonResponse
 from django.conf import settings
+import certifi
 
-def test_mongo(request):
-    try:
-        client = MongoClient(
-            settings.MONGO_URI,
-            tls=True,
-            tlsAllowInvalidCertificates=True
-        )
-        client.admin.command("ping")
-        return JsonResponse({"status": "Conectado a Mongo Atlas correctamente"})
-    except Exception as e:
-        return JsonResponse({"status": "Error", "detail": str(e)}, status=500)
+# Conexión a Mongo Atlas usando certificados válidos
+client = MongoClient(settings.MONGO_URI, tlsCAFile=certifi.where())
+db = client[settings.MONGO_DB_NAME]  # usa el nombre de la DB real
+
+# Colecciones
+tareas_col = db["tareas"]
+sesiones_col = db["sesiones"]
+microlecciones_col = db["microlecciones"]
