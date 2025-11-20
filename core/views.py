@@ -29,15 +29,20 @@ class ListaTareasView(ListView):
 
 
 def crear_tarea(request):
+    if not request.user.is_authenticated:
+        return redirect('core:lista_tareas')
+
     if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return redirect('core:lista_tareas')
+
         form = TareaForm(request.POST)
 
         if form.is_valid():
             tarea = form.save(commit=False)
-            tarea.usuario = None  # SIN USUARIO
+            tarea.usuario = request.user
             tarea.save()
 
-            # Guardar también en Mongo
             try:
                 client = MongoClient(settings.MONGO_URI)
                 db = client[settings.MONGO_DB_NAME]
@@ -45,6 +50,7 @@ def crear_tarea(request):
 
                 tareas_col.insert_one({
                     "_id_sqlite": tarea.id,
+                    "usuario": request.user.username,
                     "titulo": tarea.titulo,
                     "descripcion": tarea.descripcion,
                     "minutos_estimados": tarea.minutos_estimados,
@@ -60,6 +66,7 @@ def crear_tarea(request):
         form = TareaForm()
 
     return render(request, 'core/crear_tarea.html', {'form': form})
+
 
 
 class DetalleTareaView(DetailView):
@@ -98,8 +105,11 @@ def crear_sesion(request):
 
         if form.is_valid():
             sesion = form.save(commit=False)
-            sesion.usuario = None  # SIN USUARIO
+
+            sesion.usuario = None  
+
             sesion.fin_en = timezone.now()
+
             sesion.save()
 
             return redirect('core:detalle_sesion', sesion_id=sesion.id)
@@ -109,6 +119,7 @@ def crear_sesion(request):
         form.fields['tarea'].queryset = tareas_usuario
 
     return render(request, 'core/crear_sesion.html', {'form': form})
+
 
 
 class DetalleSesionView(DetailView):
