@@ -13,7 +13,8 @@ SECRET_KEY = 'django-insecure-=&7nxz92(t00!4q$$07b@q9^^cq1c)#_(zwz68wrbry1@d6%^@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# CAMBIADO PARA PERMITIR ACCESO DESDE INTERNET (RENDER)
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -74,7 +75,10 @@ MONGO_PASSWORD = "Lau0804*"
 MONGO_CLUSTER = "focusbuddycluster.p6nszrc.mongodb.net"
 MONGO_DB_NAME = "focusbuddy"   # ← nombre REAL donde quieres guardar tareas
 
-MONGO_URI = f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_CLUSTER}/?retryWrites=true&w=majority"
+MONGO_URI = (
+    f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}"
+    f"@{MONGO_CLUSTER}/?retryWrites=true&w=majority"
+)
 
 
 # Password validation
@@ -112,6 +116,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# AGREGADO PARA QUE FUNCIONE EN PRODUCCIÓN (RENDER)
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
