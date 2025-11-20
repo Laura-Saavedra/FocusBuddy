@@ -69,16 +69,24 @@ DATABASES = {
     }
 }
 
+
+from pymongo import MongoClient
 from urllib.parse import quote_plus
-import os
+import certifi
 
-MONGO_USER = os.environ.get("MONGO_USER", "Lsaavedra") 
-MONGO_PASSWORD = os.environ.get("MONGO_PASSWORD", "Lau0804*")  
-MONGO_CLUSTER = os.environ.get("MONGO_CLUSTER", "focusbuddycluster.p6nszrc.mongodb.net")
-MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "focusbuddy")
+MONGO_USER = "Lsaavedra"
+MONGO_PASSWORD = quote_plus("Lau0804*")  # codifica el *
+MONGO_CLUSTER = "focusbuddycluster.p6nszrc.mongodb.net"
+MONGO_DB_NAME = "focusbuddy"
 
-MONGO_URI = f"mongodb+srv://{MONGO_USER}:{quote_plus(MONGO_PASSWORD)}@{MONGO_CLUSTER}/?retryWrites=true&w=majority"
+MONGO_URI = f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_CLUSTER}/?retryWrites=true&w=majority"
 
+try:
+    client = MongoClient(MONGO_URI, tlsCAFile=certifi.where(), serverSelectionTimeoutMS=5000)
+    client.admin.command("ping")
+    print("Conectado a Mongo Atlas correctamente")
+except Exception as e:
+    print("Error al conectar a Mongo Atlas:", e)
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
