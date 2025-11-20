@@ -70,16 +70,20 @@ DATABASES = {
     }
 }
 
+import os
+import certifi
+
 # MongoDB Atlas — conexión con PyMongo
-MONGO_USER = "Lsaavedra"
-MONGO_PASSWORD = "Lau0804*"
-MONGO_CLUSTER = "focusbuddycluster.p6nszrc.mongodb.net"
-MONGO_DB_NAME = "focusbuddy"   # ← nombre REAL donde quieres guardar tareas
+MONGO_USER = os.environ.get("MONGO_USER", "Lsaavedra")
+MONGO_PASSWORD = os.environ.get("MONGO_PASSWORD", "Lau0804*")
+MONGO_CLUSTER = os.environ.get("MONGO_CLUSTER", "focusbuddycluster.p6nszrc.mongodb.net")
+MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "focusbuddy")
 
 MONGO_URI = (
     f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}"
     f"@{MONGO_CLUSTER}/?retryWrites=true&w=majority"
 )
+MONGO_TLS_CA_FILE = certifi.where()  # <- Esto asegura que use certificados confiables
 
 
 # Password validation
